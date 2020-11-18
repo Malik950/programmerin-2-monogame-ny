@@ -114,6 +114,20 @@ namespace Template
             {
                 bulletList[i].Update();
             }
+
+            for (int i = 0; i < bulletList.Count; i++)
+            {
+                for (int j = 0; j < enemies.Count; j++)
+                {
+                    if (bulletList[i].Hitbox.Intersects(enemies[j].Hitbox))
+                    {
+                        bulletList.RemoveAt(i);
+                        enemies.RemoveAt(j);
+                        i--;
+                        break;
+                    }
+                }
+            }
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -121,13 +135,13 @@ namespace Template
 
         public void LoadEnemies()
         {
-            int randY = random.Next(50, 50);
+            int randX = random.Next(0, 700);
 
             if (spawn >= 1)
             {
                 spawn = 0;
-                if (enemies.Count() < 4)
-                    enemies.Add(new Enemies(Content.Load<Texture2D>("enemy"), new Vector2(110, randY)));
+                if (enemies.Count() < 20)
+                    enemies.Add(new Enemies(Content.Load<Texture2D>("enemy"), new Vector2(randX, -100)));
             }
 
             for (int i = 0; i < enemies.Count; i++)

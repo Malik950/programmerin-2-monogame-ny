@@ -15,10 +15,21 @@ namespace Template
         public Vector2 position;
         public Vector2 velocity;
 
+        protected Rectangle hitbox;
+        public Rectangle Hitbox
+        {
+            get
+            {
+                return hitbox;
+            }
+        }
+
         public bool isVisible = true;
 
         Random random = new Random();
         int randX, randY;
+
+        Point size = new Point(70, 50);
 
         public Enemies(Texture2D newTexture, Vector2 newPosition)
         {
@@ -38,11 +49,13 @@ namespace Template
         public void Update()
         {
             position.Y++;
+
+            hitbox = new Rectangle(position.ToPoint(), size);
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, position, Color.White);
+            spriteBatch.Draw(texture, hitbox, Color.White);
         }
 
 

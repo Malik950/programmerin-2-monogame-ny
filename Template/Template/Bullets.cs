@@ -11,13 +11,9 @@ namespace Template
 {
     class Bullets : Playerbase
     {
-        protected float rotation;
 
-
-        public Vector2 Position;
         public Vector2 Origin;
 
-        public Vector2 Direction;
         public float Rotationvelocity = 3f;
         public float LinearVelocity = 4f;
 
@@ -25,20 +21,23 @@ namespace Template
 
         public bool IsRemoved = false;
 
+        private Point size = new Point(15, 15);
+
         public Bullets(Texture2D tex, Vector2 startPos) : base(tex)
         {
             Origin = new Vector2(texture.Width / 2, texture.Height / 2);
-            Position = startPos;
+            xwingpos = startPos;
         }
 
         public override void Update()
         {
-            Position += new Vector2(0, -1);
+            xwingpos += new Vector2(0, -5);
+            hitbox = new Rectangle(xwingpos.ToPoint(), size);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, Position, null, Color.White, 0f, Origin, 1f, SpriteEffects.None, 0);
+            spriteBatch.Draw(texture, hitbox, Color.White);
         }
 
         public bool isVisible;

@@ -9,6 +9,15 @@ namespace Template
     {
         protected Texture2D texture;
         protected Vector2 xwingpos = new Vector2(100, 100);
+        protected Rectangle hitbox;
+        public Rectangle Hitbox
+        {
+            get
+            {
+                return hitbox;
+            }
+        }
+
 
         public virtual void Update()
         {
