@@ -12,7 +12,8 @@ namespace Template
     /// </summary>
     public class Game1 : Game
     {
-        GraphicsDeviceManager graphics;
+       
+        private readonly GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D xwing;
         Texture2D bullets;
@@ -33,6 +34,7 @@ namespace Template
         int limit = 50;
         float countDuration = 2f;
         float currentTime = 0f;
+        int enemiesSpawned = 0;
 
         //KOmentar
         public Game1()
@@ -50,7 +52,9 @@ namespace Template
         /// </summary>
         protected override void Initialize()
         {
-
+            graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
+            graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
+            graphics.ApplyChanges();
 
             base.Initialize();
         }
@@ -69,6 +73,7 @@ namespace Template
             enemy = Content.Load<Texture2D>("enemy");
 
             player = new Player(xwing, bulletList, bullets);
+            
 
 
 
@@ -117,7 +122,7 @@ namespace Template
 
             for (int i = 0; i < bulletList.Count; i++)
             {
-                for (int j = 0; j < enemies.Count; j++)
+                for (int j =0; j < enemies.Count; j++)
                 {
                     if (bulletList[i].Hitbox.Intersects(enemies[j].Hitbox))
                     {
@@ -140,8 +145,11 @@ namespace Template
             if (spawn >= 1)
             {
                 spawn = 0;
-                if (enemies.Count() < 20)
+                if (enemiesSpawned < 20)
+                {
                     enemies.Add(new Enemies(Content.Load<Texture2D>("enemy"), new Vector2(randX, -100)));
+                    enemiesSpawned++;
+                }
             }
 
             for (int i = 0; i < enemies.Count; i++)
@@ -149,6 +157,7 @@ namespace Template
                 {
                     enemies.RemoveAt(i);
                     i--;
+                    break;
                 }
         }
 
@@ -156,7 +165,6 @@ namespace Template
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            GraphicsDevice.Clear(Color.Black);
             spriteBatch.Begin();
             player.Draw(spriteBatch);
             foreach (var item in bulletList)
@@ -166,6 +174,7 @@ namespace Template
             spriteBatch.Draw(Space, new Rectangle(), Color.White);
             foreach (Enemies enemy in enemies)
                 enemy.Draw(spriteBatch);
+
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -9,13 +8,14 @@ using System.Threading.Tasks;
 
 namespace Template
 {
-    class Enemies
+   public class Enemies
     {
         public Texture2D texture;
         public Vector2 position;
         public Vector2 velocity;
-
+        public int health;
         protected Rectangle hitbox;
+
         public Rectangle Hitbox
         {
             get
