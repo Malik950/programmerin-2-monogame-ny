@@ -30,10 +30,10 @@ namespace Template
         Bullets bullet;
 
 
-        int counter = 1;
+        int counter = 10;
         int limit = 50;
-        float countDuration = 2f;
-        float currentTime = 0f;
+        float countDuration = 10f;
+        float currentTime = 10f;
         int enemiesSpawned = 0;
 
         //KOmentar
@@ -145,7 +145,7 @@ namespace Template
             if (spawn >= 1)
             {
                 spawn = 0;
-                if (enemiesSpawned < 20)
+                if (enemiesSpawned < 50)
                 {
                     enemies.Add(new Enemies(Content.Load<Texture2D>("enemy"), new Vector2(randX, -100)));
                     enemiesSpawned++;
@@ -166,12 +166,13 @@ namespace Template
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin();
+            spriteBatch.Draw(Space, new Rectangle(0, 0, 1920,1080 ), Color.White);
             player.Draw(spriteBatch);
             foreach (var item in bulletList)
             {
                 item.Draw(spriteBatch);
             }
-            spriteBatch.Draw(Space, new Rectangle(), Color.White);
+            
             foreach (Enemies enemy in enemies)
                 enemy.Draw(spriteBatch);
 
