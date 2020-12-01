@@ -14,10 +14,12 @@ namespace Template
         KeyboardState oldKState;
         List<Bullets> BulletsList;
         Texture2D bulletTex;
+
         public Player(Texture2D tex, List<Bullets> bulletList, Texture2D bulleTex) : base(tex)
         {
             bulletTex = bulleTex;
             BulletsList = bulletList;
+            hitbox = new Rectangle(0, 0, texture.Width, texture.Height);
         }
         public override void Update()
         {
@@ -35,6 +37,17 @@ namespace Template
                 BulletsList.Add(new Bullets(bulletTex, xwingpos));
             }
 
+            if (xwingpos.X <= 0)
+                xwingpos.X = 0;
+            if (xwingpos.X >= 1780)
+                xwingpos.X = 1780;
+            if (xwingpos.Y <= 0)
+                xwingpos.Y = 0;
+            if (xwingpos.Y >= 930)
+                xwingpos.Y = 930;
+
+
+            hitbox.Location = xwingpos.ToPoint();
 
             oldKState = kstate;
         }

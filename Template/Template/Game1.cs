@@ -133,6 +133,16 @@ namespace Template
                     }
                 }
             }
+            
+                for (int j = 0; j < enemies.Count; j++)
+                {
+                    if (player.Hitbox.Intersects(enemies[j].Hitbox))
+                    {
+                    Exit();
+                    }
+                }
+            
+
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -145,7 +155,7 @@ namespace Template
             if (spawn >= 1)
             {
                 spawn = 0;
-                if (enemiesSpawned < 50)
+                if (enemiesSpawned < 10)
                 {
                     enemies.Add(new Enemies(Content.Load<Texture2D>("enemy"), new Vector2(randX, -100)));
                     enemiesSpawned++;
