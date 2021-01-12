@@ -155,7 +155,7 @@ namespace Template
             if (spawn >= 1)
             {
                 spawn = 0;
-                if (enemiesSpawned < 10)
+                if (enemiesSpawned < 100 )
                 {
                     enemies.Add(new Enemies(Content.Load<Texture2D>("enemy"), new Vector2(randX, -100)));
                     enemiesSpawned++;
