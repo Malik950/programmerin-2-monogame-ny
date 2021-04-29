@@ -2,8 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using Template.Template;
 
 namespace Template
 {
@@ -12,72 +11,123 @@ namespace Template
     /// </summary>
     public class Game1 : Game
     {
-       
-        private readonly GraphicsDeviceManager graphics;
+        public static int ScreenWidth;
+        public static int ScreenHeight;
+        GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Texture2D xwing;
-        Texture2D bullets;
-        Texture2D enemy;
-        Texture2D Space;
-        public Vector2 xwingpos = new Vector2(100, 300);
-        public Vector2 bulletspos = new Vector2(100, 300);
-        public Vector2 enemypos = new Vector2(100, 300);
-        List<Bullets> bulletList = new List<Bullets>();
-        List<Enemies> enemies = new List<Enemies>();
-        Random random = new Random();
-
         Player player;
-        Bullets bullet;
+        Texture2D playerTexture;
+        Rectangle screen;
+        int offsetPlayer = 20;
+        int offsetFont = 50;
+        SpriteFont scorePlayer, scoreAI;
+        Ball ball;
+        Texture2D ballTexture;
+        Player_AI playerAI;
+        Texture2D playerAI_texture;
+        Random rand;
+        private float _timer;
+        SpriteFont Font;
+        float time = 0;
 
-
-        int counter = 10;
-        int limit = 50;
-        float countDuration = 10f;
-        float currentTime = 10f;
-        int enemiesSpawned = 0;
-
+        //paus
+        bool paused = false;
+        Texture2D PausedTexture;
+        Rectangle PausedRectangle;
+        Button btnPlay, btnQuit;
+        bool GamePaused;
+        
         //KOmentar
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+           graphics.IsFullScreen = true;
             Content.RootDirectory = "Content";
-
+            screen = new Rectangle(0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            rand = new Random();
+            graphics.ApplyChanges();
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
+        public enum GameState
+        {
+            MainMenu,
+            ColorSelect,
+            Color1,
+        }
+        GameState Currentstate = GameState.MainMenu;
+
+
+
         protected override void Initialize()
         {
-            graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
-            graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
-            graphics.ApplyChanges();
+          //  ScreenWidth = graphics.PreferredBackBufferWidth;
+            ScreenHeight = graphics.PreferredBackBufferHeight;
+
 
             base.Initialize();
+            graphics.ApplyChanges();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
+        
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
+            // Alla sprites ritas här
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            xwing = Content.Load<Texture2D>("xwing");
-            bullets = Content.Load<Texture2D>("bullets");
-            Space = Content.Load<Texture2D>("Space");
-            enemy = Content.Load<Texture2D>("enemy");
 
-            player = new Player(xwing, bulletList, bullets);
-            
+            IsMouseVisible = true;
+
+            playerTexture = Content.Load<Texture2D>("player");
+            player = new Player(playerTexture, new Vector2(offsetPlayer, screen.Height / 2 - playerTexture.Height / 2), Vector2.Zero, 5f, screen);
+
+            ballTexture = Content.Load<Texture2D>("Ball");
+            ball = new Ball(ballTexture, new Vector2(screen.Width / 2 - ballTexture.Width / 2, screen.Height / 2 - ballTexture.Height / 2), Vector2.Zero, 5f, screen);
 
 
+            playerAI_texture = Content.Load<Texture2D>("player");
+            playerAI = new Player_AI(playerAI_texture, new Vector2(screen.Width / 2 - playerAI_texture.Width / 2, screen.Height / 2 - playerAI_texture.Height / 2), Vector2.Zero, 5f, screen);
 
-            // TODO: use this.Content to load your game content here 
+            scorePlayer = Content.Load<SpriteFont>("ScoreFont");
+            scoreAI = Content.Load<SpriteFont>("ScoreFont");
+
+            Font = Content.Load<SpriteFont>("Time");
+
+            //paus
+            PausedTexture = Content.Load<Texture2D>("Paused");
+            PausedRectangle = new Rectangle(0, 0, PausedTexture.Width, PausedTexture.Height);
+            btnPlay = new Button();
+            btnPlay.Load(Content.Load<Texture2D>("Play"), new Vector2(200, 225));
+            btnQuit = new Button();
+            btnQuit.Load(Content.Load<Texture2D>("Pause"), new Vector2(200, 275));
+
+            Restart();
+        }
+
+        private void Restart()
+        {
+            //De olika hållen bollen rör sig efter kollision
+            ball.Position = new Vector2(screen.Width / 2 - ballTexture.Width / 2, screen.Height / 2 - ballTexture.Height / 2);
+            int randNumber = rand.Next(0, 4);
+
+            switch (randNumber)
+            {
+                case 0:
+                    ball.Direction = new Vector2(1, 1);
+                    break;
+                case 1:
+                    ball.Direction = new Vector2(1, -1);
+                    break;
+                case 2:
+                    ball.Direction = new Vector2(-1, 1);
+                    break;
+                case 3:
+                    ball.Direction = new Vector2(-1, -1);
+                    break;
+
+            }
+            ball.Speed = 5;
+
+            ball.restart = false;
+
         }
 
         /// <summary>
@@ -86,105 +136,122 @@ namespace Template
         /// </summary>
         protected override void UnloadContent()
         {
-
+            
         }
 
-        float spawn = 0;
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+
+            time += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            _timer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if(_timer <= 0)
+            {
+
+            }
+
+            //ritar ut sprites
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            spawn += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            player.Update(gameTime);
+            ball.Update(gameTime);
+            playerAI.Update(gameTime);
+            ball.BoundsPlayer(player, playerAI);
+            ball.ScorePlayer(player, playerAI);
 
-            foreach (Enemies enemy in enemies)
-                enemy.Update();
+            playerAI.AI_Movement(ball);
+            playerAI.Update(gameTime);
 
-            LoadEnemies();
+            if (ball.restart)
+                Restart();
 
-            currentTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Console.WriteLine();
 
-            if (currentTime >= countDuration)
+            switch (Currentstate)
             {
-                counter++;
-                currentTime -= countDuration;
+                case GameState.MainMenu:
+                    if (Keyboard.GetState().IsKeyDown(Keys.D))
+                        Currentstate = GameState.ColorSelect;
+                    break;
+
+                case GameState.ColorSelect:
+                    if (Keyboard.GetState().IsKeyDown(Keys.A))
+                        Currentstate = GameState.MainMenu;
+                    break;
             }
-            if (counter >= limit)
-            {
-                counter = 0;
-            }
 
-            player.Update();
-            for (int i = 0; i < bulletList.Count; i++)
-            {
-                bulletList[i].Update();
-            }
+            MouseState mouse = Mouse.GetState();
 
-            for (int i = 0; i < bulletList.Count; i++)
+            if (!paused)
             {
-                for (int j =0; j < enemies.Count; j++)
+                if (Keyboard.GetState().IsKeyDown(Keys.Enter))
                 {
-                    if (bulletList[i].Hitbox.Intersects(enemies[j].Hitbox))
-                    {
-                        bulletList.RemoveAt(i);
-                        enemies.RemoveAt(j);
-                        i--;
-                        break;
-                    }
+                    paused = true;
+                    btnPlay.isClicked = false;
                 }
+
             }
-            
-                for (int j = 0; j < enemies.Count; j++)
-                {
-                    if (player.Hitbox.Intersects(enemies[j].Hitbox))
-                    {
+
+            else if (paused)
+            {
+                if (btnPlay.isClicked)
+                    paused = false;
+                if (btnQuit.isClicked)
                     Exit();
-                    }
-                }
-            
 
-            // TODO: Add your update logic here
+                btnPlay.Update(mouse);
+                btnQuit.Update(mouse);
+            }
 
             base.Update(gameTime);
         }
 
-        public void LoadEnemies()
-        {
-            int randX = random.Next(0, 700);
-
-            if (spawn >= 1)
-            {
-                spawn = 0;
-                if (enemiesSpawned < 100 )
-                {
-                    enemies.Add(new Enemies(Content.Load<Texture2D>("enemy"), new Vector2(randX, -100)));
-                    enemiesSpawned++;
-                }
-            }
-
-            for (int i = 0; i < enemies.Count; i++)
-                if (!enemies[i].isVisible)
-                {
-                    enemies.RemoveAt(i);
-                    i--;
-                    break;
-                }
-        }
-
-
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            spriteBatch.Begin();
-            spriteBatch.Draw(Space, new Rectangle(0, 0, 1920,1080 ), Color.White);
-            player.Draw(spriteBatch);
-            foreach (var item in bulletList)
+
+            switch (Currentstate)
             {
-                item.Draw(spriteBatch);
+                case GameState.MainMenu:
+                    GraphicsDevice.Clear(Color.CornflowerBlue);
+                        Currentstate = GameState.ColorSelect;
+                    break;
+
+                case GameState.ColorSelect:
+                    GraphicsDevice.Clear(Color.GreenYellow);
+                        Currentstate = GameState.MainMenu;
+                    break;
             }
-            
-            foreach (Enemies enemy in enemies)
-                enemy.Draw(spriteBatch);
+
+            spriteBatch.Begin();
+
+            spriteBatch.DrawString(scorePlayer, player.Score.ToString(), new Vector2(screen.Width / 2 - 2*offsetFont, offsetFont), Color.White);
+            spriteBatch.DrawString(scoreAI, playerAI.Score.ToString(), new Vector2(screen.Width / 2 + offsetFont, offsetFont), Color.White);
+            player.Draw(spriteBatch);
+                ball.Draw(spriteBatch);
+            playerAI.Draw(spriteBatch);
+
+            //Timer
+            spriteBatch.DrawString(Font, "Session Time:" + time.ToString("0.00"), new Vector2(100, 50), Color.Black);
+
+            //pause
+            if (paused)
+            {
+                spriteBatch.Draw(PausedTexture, PausedRectangle, Color.White);
+                btnPlay.Draw(spriteBatch);
+                btnQuit.Draw(spriteBatch);
+            }
 
             spriteBatch.End();
 
